@@ -1,0 +1,8 @@
+[
+    {
+      "origin": ["http://localhost:8080", "http://172.19.31.184:8080"],
+      "method": ["GET", "POST", "PUT", "DELETE"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  
