@@ -1,90 +1,111 @@
 <template>
-  <div class="p-4 border rounded bg-white">
-    <h2 class="text-xl font-bold mb-6 text-center">Paso 1: Identificación del Predio</h2>
+  <div class="bg-gray-50 min-h-screen py-10">
+    <div class="max-w-3xl mx-auto bg-white p-10 rounded-xl shadow-lg">
+      <h2 class="text-2xl font-bold text-center mb-2">Paso 1: Identificación del Predio</h2>
+      <p class="text-center text-sm text-gray-600 mb-6">Por favor completa la información básica del predio</p>
+      <div class="border-b mb-8"></div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Número Interno -->
-      <div>
-        <label class="block mb-1 font-medium">Número Interno *</label>
-        <input v-model="localData.numeroInterno" type="text" class="w-full p-2 border rounded" />
-      </div>
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium mb-1">Número Interno *</label>
+            <input v-model="localData.numeroInterno" type="text" class="w-full max-w-[95%] p-2 border border-gray-300 rounded" />
+          </div>
 
-      <!-- Nombre de Propiedad -->
-      <div>
-        <label class="block mb-1 font-medium">Nombre de Propiedad *</label>
-        <input v-model="localData.nombrePropiedad" type="text" class="w-full p-2 border rounded" />
-      </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Nombre de Propiedad *</label>
+            <input v-model="localData.nombrePropiedad" type="text" class="w-full max-w-[95%] p-2 border border-gray-300 rounded" />
+          </div>
 
-      <!-- Tipo de Predio (Select) -->
-      <div>
-        <label class="block mb-1 font-medium">Tipo de Predio *</label>
-        <select v-model="localData.tipo" class="w-full p-2 border rounded">
-          <option value="">Seleccione</option>
-          <option>Lote</option>
-          <option>Edificio</option>
-          <option>Local</option>
-          <option>Oficina</option>
-        </select>
-      </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Tipo de Predio *</label>
+            <select v-model="localData.tipo" class="w-full max-w-[95%] p-2 border border-gray-300 rounded">
+              <option value="">Seleccione</option>
+              <option>Lote</option>
+              <option>Edificio</option>
+              <option>Local</option>
+              <option>Oficina</option>
+            </select>
+          </div>
 
-      <!-- Dirección -->
-      <div>
-        <label class="block mb-1 font-medium">Dirección *</label>
-        <input v-model="localData.direccion" type="text" class="w-full p-2 border rounded" />
-      </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Dirección *</label>
+            <input v-model="localData.direccion" type="text" class="w-full max-w-[95%] p-2 border border-gray-300 rounded" />
+          </div>
 
-      <!-- Ciudad (Select) -->
-      <div>
-        <label class="block mb-1 font-medium">Ciudad *</label>
-        <select v-model="localData.ciudad" class="w-full p-2 border rounded">
-          <option value="">Seleccione</option>
-          <option>Bogotá</option>
-          <option>Medellín</option>
-          <option>Cali</option>
-          <option>Barranquilla</option>
-          <option>Cartagena</option>
-          <option>Bucaramanga</option>
-          <option>Pereira</option>
-          <option>Manizales</option>
-          <option>Santa Marta</option>
-          <option>Villavicencio</option>
-          <option>Montería</option>
-          <option>Cúcuta</option>
-          <option>Neiva</option>
-          <option>Ibagué</option>
-          <option>Pasto</option>
-        </select>
-      </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Ciudad *</label>
+            <select v-model="localData.ciudad" class="w-full max-w-[95%] p-2 border border-gray-300 rounded">
+              <option value="">Seleccione</option>
+              <option>Bogotá</option>
+              <option>Medellín</option>
+              <option>Cali</option>
+              <option>Barranquilla</option>
+              <option>Cartagena</option>
+              <option>Bucaramanga</option>
+              <option>Pereira</option>
+              <option>Manizales</option>
+              <option>Santa Marta</option>
+              <option>Villavicencio</option>
+              <option>Montería</option>
+              <option>Cúcuta</option>
+              <option>Neiva</option>
+              <option>Ibagué</option>
+              <option>Pasto</option>
+            </select>
+          </div>
 
-      <!-- Matrícula Inmobiliaria -->
-      <div>
-        <label class="block mb-1 font-medium">Número Matrícula Inmobiliaria</label>
-        <input v-model="localData.matriculaInmobiliaria" type="text" class="w-full p-2 border rounded" />
-      </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Número Matrícula Inmobiliaria</label>
+            <input v-model="localData.matriculaInmobiliaria" type="text" class="w-full max-w-[95%] p-2 border border-gray-300 rounded" />
+          </div>
 
-      <!-- CHIP -->
-      <div>
-        <label class="block mb-1 font-medium">CHIP</label>
-        <input v-model="localData.chip" type="text" class="w-full p-2 border rounded" />
-      </div>
-    </div>
-
-    <!-- Propietarios y Porcentaje Dinámicos -->
-    <div class="mt-8">
-      <h3 class="text-lg font-semibold mb-4">Propietarios del Predio</h3>
-      <div v-for="(propietario, index) in localData.nombrePropietarios" :key="index" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 items-center">
-        <input v-model="propietario.nombre" type="text" placeholder="Nombre del Propietario" class="p-2 border rounded" />
-        <div class="flex items-center">
-          <input v-model="propietario.porcentaje" type="number" min="0" max="100" placeholder="%" class="p-2 border rounded w-full" />
-          <span class="ml-2">%</span>
+          <div>
+            <label class="block text-sm font-medium mb-1">CHIP</label>
+            <input v-model="localData.chip" type="text" class="w-full max-w-[95%] p-2 border border-gray-300 rounded" />
+          </div>
         </div>
-        <button @click="eliminarPropietario(index)" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-800">
-          🗑 Eliminar
-        </button>
+
+        <!-- Propietarios -->
+        <div class="pt-6">
+          <h3 class="text-lg font-semibold mb-4">Propietarios del Predio</h3>
+          <div
+            v-for="(propietario, index) in localData.nombrePropietarios"
+            :key="index"
+            class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mb-4"
+          >
+            <input
+              v-model="propietario.nombre"
+              type="text"
+              placeholder="Nombre del Propietario"
+              class="p-2 border border-gray-300 rounded"
+            />
+            <div class="flex items-center">
+              <input
+                v-model="propietario.porcentaje"
+                type="number"
+                min="0"
+                max="100"
+                placeholder="%"
+                class="p-2 border border-gray-300 rounded w-full"
+              />
+              <span class="ml-2">%</span>
+            </div>
+            <button
+              @click="eliminarPropietario(index)"
+              class="bg-red-600 hover:bg-red-800 text-white px-3 py-2 rounded text-sm"
+            >
+              🗑 Eliminar
+            </button>
+          </div>
+          <button
+            @click="agregarPropietario"
+            class="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded text-sm mt-2 mb-8"
+          >
+            + Agregar Propietario
+          </button>
+        </div>
       </div>
-      <button @click="agregarPropietario" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800">
-        + Agregar Propietario
-      </button>
     </div>
   </div>
 </template>
