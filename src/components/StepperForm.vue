@@ -6,14 +6,9 @@
 
     <main class="flex-grow p-6 bg-gray-50">
       <div class="max-w-6xl mx-auto">
-        <!-- Navegación Stepper -->
-        <div class="flex flex-wrap justify-between mb-8">
-          <div v-for="(step, index) in steps" :key="index" class="flex-1 min-w-[120px] mb-2">
-            <div :class="['text-center py-2 rounded text-sm', currentStep === index ? 'bg-black text-white' : 'bg-gray-200 text-black']">
-              {{ step }}
-            </div>
-          </div>
-        </div>
+        <!-- Navegación del Stepper con componente -->
+          <AppNavigationTabs :steps="steps" :currentStep="currentStep" />
+
 
         <!-- Componente actual -->
         <div class="bg-gray-100 p-6 rounded shadow">
@@ -33,9 +28,7 @@
       </div>
     </main>
 
-    <footer class="bg-black text-white text-center p-4">
-      © 2025 Argolider - Gestión de Activos Inmobiliarios
-    </footer>
+    
   </div>
 </template>
 
@@ -52,10 +45,13 @@ import PasoDatosComplementarios from './steps/PasoDatosComplementarios.vue'
 import PasoResumen from './steps/PasoResumen.vue'
 import { db } from '../firebase/config'
 import { collection, addDoc } from 'firebase/firestore'
+import AppNavigationTabs from './layout/AppNavigationTabs.vue'
+
 
 export default {
   name: 'StepperForm',
   components: {
+    AppNavigationTabs,
     PasoIdentificacion,
     PasoEstadoAdministrativo,
     PasoAvaluo,

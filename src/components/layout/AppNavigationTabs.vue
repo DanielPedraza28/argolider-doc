@@ -1,34 +1,26 @@
 <template>
-  <div class="flex items-center justify-center mb-10 overflow-x-auto">
-    <ul class="flex space-x-6">
-      <li
-        v-for="(step, index) in steps"
-        :key="index"
-        class="flex items-center"
+  <div class="flex justify-center space-x-8 mb-10">
+    <div
+      v-for="(step, index) in steps"
+      :key="index"
+      class="flex items-center space-x-2"
+    >
+      <div
+        :class="[
+          'w-8 h-8 rounded-full flex items-center justify-center font-bold',
+          currentStep === index ? 'bg-black text-white' : 'bg-gray-300 text-gray-700'
+        ]"
       >
-        <div class="flex items-center">
-          <div
-            class="w-8 h-8 flex items-center justify-center rounded-full border-2 text-sm font-bold"
-            :class="{
-              'bg-black text-white border-black': currentStep === index,
-              'bg-white text-gray-500 border-gray-300': currentStep !== index
-            }"
-          >
-            {{ index + 1 }}
-          </div>
-          <span
-            class="ml-2 text-sm font-medium"
-            :class="currentStep === index ? 'text-black' : 'text-gray-500'"
-          >
-            {{ step }}
-          </span>
-        </div>
-        <div
-          v-if="index < steps.length - 1"
-          class="w-6 h-px bg-gray-300 mx-3 hidden md:block"
-        ></div>
-      </li>
-    </ul>
+        {{ index + 1 }}
+      </div>
+      <span :class="currentStep === index ? 'text-black font-semibold' : 'text-gray-600'">
+        {{ step }}
+      </span>
+      <div
+        v-if="index < steps.length - 1"
+        class="w-6 h-0.5 bg-gray-300"
+      ></div>
+    </div>
   </div>
 </template>
 
@@ -41,9 +33,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-::-webkit-scrollbar {
-  display: none;
-}
-</style>

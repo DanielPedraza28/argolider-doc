@@ -1,11 +1,9 @@
 <template>
-  <footer class="bg-gray-100 text-center py-4 text-xs text-gray-500 mt-12">
-    © 2025 Argolider. Sistema de gestión documental de predios.
+  <footer class="bg-black text-white text-center p-4 text-sm">
+    © 2025 Argolider - Gestión de Activos Inmobiliarios
   </footer>
 </template>
 
 <script>
-export default {
-  name: 'AppFooter'
-}
+export default { name: 'AppFooter' }
 </script>
