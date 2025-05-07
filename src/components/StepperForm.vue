@@ -1,34 +1,35 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-white text-black">
-    <header class="bg-black text-white p-4 text-center text-2xl font-bold">
-      Gestión Documental Inmobiliaria - Argolider
-    </header>
-
-    <main class="flex-grow p-6 bg-gray-50">
+  <div class="flex flex-col bg-gray-50 text-black">
+    <main class="flex-grow px-4 pt-4 pb-2">
       <div class="max-w-6xl mx-auto">
-        <!-- Navegación del Stepper con componente -->
-          <AppNavigationTabs :steps="steps" :currentStep="currentStep" />
+        <!-- Navegación del Stepper -->
+        <AppNavigationTabs :steps="steps" :currentStep="currentStep" />
 
-
-        <!-- Componente actual -->
-        <div class="bg-gray-100 p-6 rounded shadow">
+        <!-- Componente del paso -->
+        <div class="bg-gray-100 p-6 rounded shadow max-h-[70vh] overflow-y-auto">
           <component :is="currentComponent" v-model="formData" />
         </div>
 
-        <!-- Botones de navegación -->
-        <div class="flex justify-between mt-8">
-          <button class="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-600" @click="previousStep" :disabled="currentStep === 0">
+
+        <!-- Navegación -->
+        <div class="flex justify-between items-center mt-6">
+          <button
+            class="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-600 disabled:opacity-50"
+            @click="previousStep"
+            :disabled="currentStep === 0"
+          >
             Anterior
           </button>
 
-          <button class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800" @click="handleNext">
+          <button
+            class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+            @click="handleNext"
+          >
             {{ isLastStep ? 'Finalizar y Guardar' : 'Siguiente' }}
           </button>
         </div>
       </div>
     </main>
-
-    
   </div>
 </template>
 
@@ -43,10 +44,9 @@ import PasoEstadoJuridico from './steps/PasoEstadoJuridico.vue'
 import PasoEstadoTecnico from './steps/PasoEstadoTecnico.vue'
 import PasoDatosComplementarios from './steps/PasoDatosComplementarios.vue'
 import PasoResumen from './steps/PasoResumen.vue'
+import AppNavigationTabs from './layout/AppNavigationTabs.vue'
 import { db } from '../firebase/config'
 import { collection, addDoc } from 'firebase/firestore'
-import AppNavigationTabs from './layout/AppNavigationTabs.vue'
-
 
 export default {
   name: 'StepperForm',
@@ -79,13 +79,27 @@ export default {
         'Resumen Final'
       ],
       formData: {
-        numeroInterno: '', nombrePropiedad: '', tipo: '', direccion: '', ciudad: '', matriculaInmobiliaria: '', chip: '', nombrePropietarios: [], porcentajePropietarios: '', estado: '', fechaInicio: '', fechaTerminacion: '', numeroProrroga: '', nombreArrendatarios: '', canonArrendamiento: '', areaArrendada: '', avaluoCatastralActual: '', avaluoCatastralAnterior: '', avaluoComercialUltimo: '', fechaAvaluoComercial: '', validacionValorizacion: '', fechaCalculoImpuesto: '', valorImpuestoPredial: '', observacionesDeudaImpuestos: '', energiaNombreProveedor: '', energiaDireccionFactura: '', energiaCuentas: [], energiaMedidores: [], energiaObservaciones: '', aguaNombreProveedor: '', aguaDireccionFactura: '', aguaCuentas: [], aguaMedidores: [], aguaObservaciones: '', gasNombreProveedor: '', gasDireccionFactura: '', gasCuentas: [], gasMedidores: [], gasObservaciones: '', claseInventario: '', fechaUltimoInventario: '', tipoProceso: '', descripcionProceso: '', fechaLicenciaInicial: '', fechaModificacion: '', descripcionEstadoLicencia: '', latitud: '', longitud: '', nombresAntiguos: [], imagenes: []
+        numeroInterno: '', nombrePropiedad: '', tipo: '', direccion: '', ciudad: '',
+        matriculaInmobiliaria: '', chip: '', nombrePropietarios: [], porcentajePropietarios: '',
+        estado: '', fechaInicio: '', fechaTerminacion: '', numeroProrroga: '',
+        nombreArrendatarios: '', canonArrendamiento: '', areaArrendada: '',
+        avaluoCatastralActual: '', avaluoCatastralAnterior: '', avaluoComercialUltimo: '',
+        fechaAvaluoComercial: '', validacionValorizacion: '',
+        fechaCalculoImpuesto: '', valorImpuestoPredial: '', observacionesDeudaImpuestos: '',
+        energiaNombreProveedor: '', energiaDireccionFactura: '', energiaCuentas: [], energiaMedidores: [], energiaObservaciones: '',
+        aguaNombreProveedor: '', aguaDireccionFactura: '', aguaCuentas: [], aguaMedidores: [], aguaObservaciones: '',
+        gasNombreProveedor: '', gasDireccionFactura: '', gasCuentas: [], gasMedidores: [], gasObservaciones: '',
+        claseInventario: '', fechaUltimoInventario: '',
+        tipoProceso: '', descripcionProceso: '',
+        fechaLicenciaInicial: '', fechaModificacion: '', descripcionEstadoLicencia: '',
+        latitud: '', longitud: '',
+        nombresAntiguos: [], imagenes: []
       }
     }
   },
   computed: {
     currentComponent() {
-      const components = [
+      return [
         PasoIdentificacion,
         PasoEstadoAdministrativo,
         PasoAvaluo,
@@ -96,8 +110,7 @@ export default {
         PasoEstadoTecnico,
         PasoDatosComplementarios,
         PasoResumen
-      ]
-      return components[this.currentStep]
+      ][this.currentStep]
     },
     isLastStep() {
       return this.currentStep === this.steps.length - 1
@@ -122,20 +135,9 @@ export default {
           alert('Por favor completa todos los campos obligatorios en Identificación')
           return false
         }
-      } else if (this.currentStep === 1) {
-        if (!d.estado) {
-          alert('Por favor selecciona el Estado')
-          return false
-        }
-        if (d.estado === 'Arrendado' && !d.fechaInicio) {
-          alert('Si el estado es Arrendado, la Fecha de Inicio es obligatoria')
-          return false
-        }
-      } else if (this.currentStep === 2) {
-        if (!d.avaluoCatastralActual) {
-          alert('El avalúo catastral actual es obligatorio')
-          return false
-        }
+      } else if (this.currentStep === 1 && !d.estado) {
+        alert('Por favor selecciona el Estado')
+        return false
       }
       return true
     },
@@ -156,8 +158,7 @@ export default {
       }
     },
     resetForm() {
-      const original = this.$options.data().formData
-      this.formData = JSON.parse(JSON.stringify(original))
+      this.formData = JSON.parse(JSON.stringify(this.$options.data().formData))
     }
   }
 }

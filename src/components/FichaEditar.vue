@@ -1,37 +1,33 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-white text-black">
-    <header class="bg-black text-white p-4 text-center text-2xl font-bold">
-      Editar Ficha del Predio
-    </header>
+  <main class="flex-grow p-6 bg-gray-50">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-center text-2xl font-semibold mb-6">Editar Ficha del Predio</h2>
 
-    <main class="flex-grow p-6 bg-gray-50">
-      <div class="max-w-6xl mx-auto">
-        <div v-if="cargando" class="text-center py-10">Cargando datos...</div>
+      <div v-if="cargando" class="text-center py-10">Cargando datos...</div>
 
-        <div v-else>
-          <div class="bg-white p-6 rounded shadow">
-            <component :is="currentComponent" v-model="formData" />
-          </div>
-
-          <div class="flex justify-between mt-8">
-            <button
-              class="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-600"
-              @click="anteriorPaso"
-              :disabled="pasoActual === 0"
-            >
-              Anterior
-            </button>
-            <button
-              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
-              @click="siguientePaso"
-            >
-              {{ pasoActual === pasos.length - 1 ? 'Guardar Cambios' : 'Siguiente' }}
-            </button>
-          </div>
+      <div v-else>
+        <div class="bg-white p-6 rounded shadow max-h-[70vh] overflow-y-auto">
+          <component :is="currentComponent" v-model="formData" />
+        </div>
+        
+        <div class="flex justify-between mt-8">
+          <button
+            class="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-600"
+            @click="anteriorPaso"
+            :disabled="pasoActual === 0"
+          >
+            Anterior
+          </button>
+          <button
+            class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+            @click="siguientePaso"
+          >
+            {{ pasoActual === pasos.length - 1 ? 'Guardar Cambios' : 'Siguiente' }}
+          </button>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
 </template>
 
 <script>

@@ -66,7 +66,11 @@
       <!-- Propietarios -->
       <div class="border-t pt-4 mt-6">
         <label class="block font-semibold mb-2">Propietarios del Predio</label>
-        <div v-for="(propietario, index) in form.nombrePropietarios" :key="index" class="flex items-center gap-4 mb-2">
+        <div
+          v-for="(propietario, index) in form.nombrePropietarios"
+          :key="index"
+          class="flex items-center gap-4 mb-2"
+        >
           <input v-model="form.nombrePropietarios[index]" type="text" placeholder="Nombre del propietario" class="flex-1" />
           <div class="flex items-center">
             <input v-model="form.porcentajePropietarios[index]" type="number" min="0" max="100" placeholder="%" class="w-20 mr-1" />
@@ -74,7 +78,11 @@
           </div>
           <button type="button" class="text-red-600 font-bold" @click="eliminarPropietario(index)">✕</button>
         </div>
-        <button type="button" class="mt-2 bg-black text-white px-4 py-1 rounded hover:bg-gray-800" @click="agregarPropietario">
+        <button
+          type="button"
+          class="mt-2 bg-black text-white px-4 py-1 rounded hover:bg-gray-800"
+          @click="agregarPropietario"
+        >
           + Agregar Propietario
         </button>
       </div>
@@ -100,13 +108,22 @@ export default {
   },
   methods: {
     agregarPropietario() {
+      if (!Array.isArray(this.form.nombrePropietarios)) {
+        this.form.nombrePropietarios = []
+      }
+      if (!Array.isArray(this.form.porcentajePropietarios)) {
+        this.form.porcentajePropietarios = []
+      }
       this.form.nombrePropietarios.push('')
-      this.form.porcentajePropietarios = this.form.porcentajePropietarios || []
       this.form.porcentajePropietarios.push('')
     },
     eliminarPropietario(index) {
-      this.form.nombrePropietarios.splice(index, 1)
-      this.form.porcentajePropietarios.splice(index, 1)
+      if (Array.isArray(this.form.nombrePropietarios)) {
+        this.form.nombrePropietarios.splice(index, 1)
+      }
+      if (Array.isArray(this.form.porcentajePropietarios)) {
+        this.form.porcentajePropietarios.splice(index, 1)
+      }
     }
   }
 }

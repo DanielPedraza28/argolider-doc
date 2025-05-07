@@ -1,28 +1,47 @@
 <template>
-  <div class="ficha-lista">
-    <h2>Listado de Fichas Registradas</h2>
+  <div class="max-w-6xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-bold text-center mb-6">Listado de Fichas Registradas</h2>
 
     <input
       type="text"
       v-model="terminoBusqueda"
-      placeholder="🔍 Buscar por nombre, matrícula, dirección, ciudad, etc..."
-      class="buscador"
+      placeholder="Buscar por nombre, matrícula, dirección, ciudad, etc..."
+      class="w-full p-3 mb-8 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-black"
     />
 
-    <div v-if="loading">Cargando fichas...</div>
-    <div v-else-if="fichasFiltradas.length === 0">No se encontraron fichas.</div>
+    <div v-if="loading" class="text-center text-gray-500">Cargando fichas...</div>
+    <div v-else-if="fichasFiltradas.length === 0" class="text-center text-gray-600">No se encontraron fichas.</div>
 
-    <div v-else class="tarjetas">
-      <div class="tarjeta" v-for="(ficha, index) in fichasFiltradas" :key="index">
-        <h3>{{ ficha.nombrePropiedad }} <span>({{ ficha.numeroInterno }})</span></h3>
+    <div v-else class="grid gap-6">
+      <div
+        class="border border-black rounded-lg p-6 bg-white shadow-sm"
+        v-for="(ficha, index) in fichasFiltradas"
+        :key="index"
+      >
+        <h3 class="text-lg font-semibold mb-1">{{ ficha.nombrePropiedad }} <span class="text-gray-500 text-sm">({{ ficha.numeroInterno }})</span></h3>
         <p><strong>Ubicación:</strong> {{ ficha.direccion }}</p>
         <p><strong>Ciudad:</strong> {{ ficha.ciudad }}</p>
         <p><strong>Área Arrendada:</strong> {{ ficha.areaArrendada || '—' }}</p>
 
-        <div class="botones-accion">
-          <button class="boton-ver" @click="verDetalle(ficha.id)">🔍 Ver detalle</button>
-          <button class="boton-editar" @click="editarFicha(ficha.id)">✏️ Editar</button>
-          <button class="boton-eliminar" @click="eliminarFicha(ficha.id, ficha.nombrePropiedad)">🗑️ Eliminar</button>
+        <div class="flex gap-2 mt-4">
+          <button
+            class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 text-sm"
+            @click="verDetalle(ficha.id)"
+          >
+            Ver detalle
+          </button>
+          <button
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 text-sm"
+            @click="editarFicha(ficha.id)"
+          >
+            Editar
+          </button>
+          <button
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500 text-sm"
+            @click="eliminarFicha(ficha.id, ficha.nombrePropiedad)"
+          >
+            Eliminar
+          </button>
         </div>
       </div>
     </div>
@@ -97,67 +116,5 @@ export default {
 </script>
 
 <style scoped>
-.ficha-lista {
-  max-width: 1000px;
-  margin: 0 auto;
-  font-family: 'Georgia', serif;
-}
-
-.buscador {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 30px;
-  border-radius: 5px;
-  border: 1px solid #aaa;
-}
-
-.tarjetas {
-  display: grid;
-  gap: 20px;
-}
-
-.tarjeta {
-  border: 2px solid black;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: white;
-}
-
-.tarjeta h3 {
-  font-size: 1.2em;
-}
-
-.tarjeta span {
-  font-size: 0.9em;
-  color: gray;
-}
-
-.botones-accion {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-
-button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 5px;
-  font-family: 'Georgia', serif;
-  cursor: pointer;
-}
-
-.boton-editar {
-  background-color: #444;
-  color: white;
-}
-
-.boton-eliminar {
-  background-color: crimson;
-  color: white;
-}
-
-.boton-ver {
-  background-color: darkblue;
-  color: white;
-}
+/* Ya no necesitamos estilos personalizados si usamos Tailwind */
 </style>
