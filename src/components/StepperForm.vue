@@ -2,30 +2,49 @@
   <div class="flex flex-col bg-gray-50 text-black">
     <main class="flex-grow px-4 pt-4 pb-2">
       <div class="max-w-6xl mx-auto">
-        <!-- Navegación del Stepper -->
         <AppNavigationTabs :steps="steps" :currentStep="currentStep" />
 
-        <!-- Componente del paso -->
         <div class="bg-gray-100 p-6 rounded shadow max-h-[70vh] overflow-y-auto">
-          <component :is="currentComponent" v-model="formData" />
+          <component
+            :is="currentComponent"
+            v-model="formData"
+            @archivoEliminado="registrarArchivoParaEliminar"
+            @archivoTemporal="registrarArchivoTemporal"
+          />
         </div>
 
-
-        <!-- Navegación -->
         <div class="flex justify-between items-center mt-6">
-          <button
-            class="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-600 disabled:opacity-50"
-            @click="previousStep"
-            :disabled="currentStep === 0"
-          >
-            Anterior
-          </button>
+          <div class="flex gap-4">
+            <button
+              class="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-600 disabled:opacity-50"
+              @click="previousStep"
+              :disabled="currentStep === 0"
+            >
+              Anterior
+            </button>
+
+            <button
+              v-if="modoEdicion"
+              class="px-6 py-2 bg-white text-black border border-black rounded hover:bg-gray-100"
+              @click="cancelarEdicion"
+            >
+              Cancelar edición
+            </button>
+
+            <button
+              v-if="!modoEdicion"
+              class="px-6 py-2 bg-white text-black border border-black rounded hover:bg-gray-100"
+              @click="cancelarCreacion"
+            >
+              Cancelar creación
+            </button>
+          </div>
 
           <button
             class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
             @click="handleNext"
           >
-            {{ isLastStep ? 'Finalizar y Guardar' : 'Siguiente' }}
+            {{ isLastStep ? (modoEdicion ? 'Guardar Cambios' : 'Finalizar y Guardar') : 'Siguiente' }}
           </button>
         </div>
       </div>
@@ -45,8 +64,10 @@ import PasoEstadoTecnico from './steps/PasoEstadoTecnico.vue'
 import PasoDatosComplementarios from './steps/PasoDatosComplementarios.vue'
 import PasoResumen from './steps/PasoResumen.vue'
 import AppNavigationTabs from './layout/AppNavigationTabs.vue'
-import { db } from '../firebase/config'
-import { collection, addDoc } from 'firebase/firestore'
+
+import { db, storage } from '../firebase/config'
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore'
+import { ref as storageRef, deleteObject } from 'firebase/storage'
 
 export default {
   name: 'StepperForm',
@@ -63,9 +84,22 @@ export default {
     PasoDatosComplementarios,
     PasoResumen
   },
+  props: {
+    fichaId: {
+      type: String,
+      default: null
+    },
+    fichaData: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
       currentStep: 0,
+      modoEdicion: false,
+      archivosParaEliminar: [],
+      archivosTemporales: [],
       steps: [
         'Identificación',
         'Estado Administrativo',
@@ -80,7 +114,8 @@ export default {
       ],
       formData: {
         numeroInterno: '', nombrePropiedad: '', tipo: '', direccion: '', ciudad: '',
-        matriculaInmobiliaria: '', chip: '', nombrePropietarios: [], porcentajePropietarios: '',
+        matriculaInmobiliaria: '', documentoMatriculaInmobiliariaUrl: '', chip: '',
+        nombrePropietarios: [], porcentajePropietarios: '',
         estado: '', fechaInicio: '', fechaTerminacion: '', numeroProrroga: '',
         nombreArrendatarios: '', canonArrendamiento: '', areaArrendada: '',
         avaluoCatastralActual: '', avaluoCatastralAnterior: '', avaluoComercialUltimo: '',
@@ -89,7 +124,8 @@ export default {
         energiaNombreProveedor: '', energiaDireccionFactura: '', energiaCuentas: [], energiaMedidores: [], energiaObservaciones: '',
         aguaNombreProveedor: '', aguaDireccionFactura: '', aguaCuentas: [], aguaMedidores: [], aguaObservaciones: '',
         gasNombreProveedor: '', gasDireccionFactura: '', gasCuentas: [], gasMedidores: [], gasObservaciones: '',
-        claseInventario: '', fechaUltimoInventario: '',
+        claseInventario: '', fechaUltimoInventario: '', documentoClaseInventarioUrl: '',
+        documentoEstadoTecnicoUrl: '',
         tipoProceso: '', descripcionProceso: '',
         fechaLicenciaInicial: '', fechaModificacion: '', descripcionEstadoLicencia: '',
         latitud: '', longitud: '',
@@ -116,6 +152,13 @@ export default {
       return this.currentStep === this.steps.length - 1
     }
   },
+  mounted() {
+    if (this.fichaId && Object.keys(this.fichaData).length) {
+      this.formData = JSON.parse(JSON.stringify(this.fichaData))
+      this.modoEdicion = true
+      sessionStorage.setItem('modoEdicionActiva', 'true')
+    }
+  },
   methods: {
     previousStep() {
       if (this.currentStep > 0) this.currentStep--
@@ -126,6 +169,25 @@ export default {
         this.saveForm()
       } else {
         this.currentStep++
+      }
+    },
+    cancelarEdicion() {
+      if (confirm('¿Seguro que deseas cancelar la edición? Se perderán los cambios no guardados.')) {
+        this.resetForm()
+        this.currentStep = 0
+        this.modoEdicion = false
+        sessionStorage.removeItem('modoEdicionActiva')
+        console.log('🧹 modoEdicionActiva eliminado al cancelar')
+        this.$router.push('/fichas')
+      }
+    },
+    cancelarCreacion() {
+      if (confirm('¿Seguro que deseas cancelar la creación de esta ficha?')) {
+        this.resetForm()
+        this.currentStep = 0
+        sessionStorage.removeItem('modoEdicionActiva')
+        console.log('🧹 Creación cancelada y archivos temporales limpiados')
+        // No redirigir a otra pestaña
       }
     },
     validarPaso() {
@@ -141,24 +203,84 @@ export default {
       }
       return true
     },
+    registrarArchivoParaEliminar(url) {
+      if (url && !this.archivosParaEliminar.includes(url)) {
+        this.archivosParaEliminar.push(url)
+        console.log('❌ Archivo marcado para eliminar:', url)
+      }
+    },
+    registrarArchivoTemporal(url) {
+      if (url && !this.archivosTemporales.includes(url)) {
+        this.archivosTemporales.push(url)
+        console.log('📎 Archivo temporal registrado:', url)
+      }
+    },
+    async eliminarListaArchivos(lista) {
+      for (const url of lista) {
+        try {
+          console.log('🧹 Intentando eliminar:', url)
+
+          const baseUrl = "https://firebasestorage.googleapis.com/v0/b/"
+          const bucket = storage.app.options.storageBucket
+          const pathStart = `${baseUrl}${bucket}/o/`
+          const encodedPath = url.replace(pathStart, '').split('?')[0]
+          const decodedPath = decodeURIComponent(encodedPath)
+
+          const archivoRef = storageRef(storage, decodedPath)
+          await deleteObject(archivoRef)
+
+          console.log('✅ Archivo eliminado de Firebase Storage:', decodedPath)
+        } catch (error) {
+          console.error('❌ Error al eliminar archivo:', url, error)
+        }
+      }
+    },
     async saveForm() {
       try {
         const fichaConFecha = {
           fechaCreacion: new Date().toISOString(),
           ...this.formData,
+          documentoMatriculaInmobiliariaUrl: this.formData.documentoMatriculaInmobiliariaUrl || '',
+          documentoClaseInventarioUrl: this.formData.documentoClaseInventarioUrl || '',
           imagenes: (this.formData.imagenes || []).map(img => img.name || img)
         }
-        await addDoc(collection(db, 'predios'), fichaConFecha)
-        alert('✅ Ficha guardada correctamente en Firebase')
+
+        if (this.modoEdicion && this.fichaId) {
+          const ref = doc(db, 'predios', this.fichaId)
+          await updateDoc(ref, fichaConFecha)
+        } else {
+          await addDoc(collection(db, 'predios'), fichaConFecha)
+        }
+
+        await this.eliminarListaArchivos(this.archivosParaEliminar)
+        this.archivosParaEliminar = []
+        this.archivosTemporales = []
+
+        alert(this.modoEdicion ? '✅ Cambios guardados' : '✅ Ficha guardada correctamente')
         this.resetForm()
         this.currentStep = 0
+        this.modoEdicion = false
+        sessionStorage.removeItem('modoEdicionActiva')
+        console.log('🧹 modoEdicionActiva eliminado después de guardar')
+        this.$router.push('/fichas')
       } catch (error) {
         console.error('❌ Error al guardar en Firebase:', error)
         alert('Ocurrió un error al guardar. Revisa la consola.')
       }
     },
     resetForm() {
-      this.formData = JSON.parse(JSON.stringify(this.$options.data().formData))
+      this.eliminarListaArchivos(this.archivosTemporales)
+
+      const camposIniciales = this.$options.data().formData
+      for (const key in camposIniciales) {
+        this.formData[key] = JSON.parse(JSON.stringify(camposIniciales[key]))
+      }
+
+      this.formData.documentoEstadoTecnicoUrl = ''
+      this.archivosParaEliminar = []
+      this.archivosTemporales = []
+      sessionStorage.removeItem('modoEdicionActiva')
+      console.log('🧹 Campos limpiados con resetForm()')
     }
   }
 }

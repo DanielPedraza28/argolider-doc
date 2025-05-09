@@ -56,33 +56,54 @@
       <div>
         <label>Número Matrícula Inmobiliaria</label>
         <input v-model="form.matriculaInmobiliaria" type="text" />
-        <input type="file" accept="application/pdf" @change="handleArchivoMatricula" class="mt-2" />
-        <div v-if="form.documentoMatriculaInmobiliariaUrl" class="mt-2">
-          <a :href="form.documentoMatriculaInmobiliariaUrl" target="_blank" class="text-blue-600 underline">
-            Ver documento cargado
-          </a>
+        <input
+          v-if="!form.documentoMatriculaInmobiliariaUrl"
+          type="file"
+          accept="application/pdf"
+          @change="handleArchivoMatricula"
+          class="mt-2"
+        />
+
+        <!-- Bloque visual para documento cargado -->
+        <div v-if="form.documentoMatriculaInmobiliariaUrl" class="mt-4 bg-gray-100 p-3 rounded shadow text-sm text-black">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 1.5a1 1 0 0 1 1 0l6 3A1 1 0 0 1 17 5v10a1 1 0 0 1-.553.894l-6 3a1 1 0 0 1-.894 0l-6-3A1 1 0 0 1 3 15V5a1 1 0 0 1 .553-.894l6-3zM10 11H9v4H8v-4H7v-1h3v1z" />
+              </svg>
+              <a
+                :href="form.documentoMatriculaInmobiliariaUrl"
+                target="_blank"
+                class="text-black font-medium underline hover:text-gray-700"
+              >
+                Ver Matrícula Inmobiliaria (PDF)
+              </a>
+            </div>
+            <div class="flex items-center gap-4">
+              <button class="text-sm text-gray-600 hover:text-black font-semibold underline" @click="triggerInputArchivoMatricula">
+                Reemplazar documento
+              </button>
+              <button class="text-sm text-red-600 hover:text-red-800 font-semibold underline" @click="eliminarArchivoMatricula">
+                Eliminar documento
+              </button>
+            </div>
+          </div>
+          <div class="ml-7 mt-1 text-gray-500 text-xs">
+            {{ nombreArchivoMatricula }}
+          </div>
+          <input
+            ref="inputArchivoMatricula"
+            type="file"
+            accept="application/pdf"
+            class="hidden"
+            @change="handleArchivoMatricula"
+          />
         </div>
       </div>
 
       <div>
         <label>CHIP</label>
         <input v-model="form.chip" type="text" />
-      </div>
-
-      <!-- Propietarios -->
-      <div class="border-t pt-4 mt-6">
-        <label class="block font-semibold mb-2">Propietarios del Predio</label>
-        <div v-for="(propietario, index) in form.nombrePropietarios" :key="index" class="flex items-center gap-4 mb-2">
-          <input v-model="form.nombrePropietarios[index]" type="text" placeholder="Nombre del propietario" class="flex-1" />
-          <div class="flex items-center">
-            <input v-model="form.porcentajePropietarios[index]" type="number" min="0" max="100" placeholder="%" class="w-20 mr-1" />
-            <span>%</span>
-          </div>
-          <button type="button" class="text-red-600 font-bold" @click="eliminarPropietario(index)">✕</button>
-        </div>
-        <button type="button" class="mt-2 bg-black text-white px-4 py-1 rounded hover:bg-gray-800" @click="agregarPropietario">
-          + Agregar Propietario
-        </button>
       </div>
     </div>
   </div>
@@ -105,26 +126,51 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value)
       }
+    },
+    nombreArchivoMatricula() {
+      const url = this.form.documentoMatriculaInmobiliariaUrl
+      if (!url) return ''
+      try {
+        const decoded = decodeURIComponent(url)
+        return decoded.substring(decoded.lastIndexOf('/') + 1).split('?')[0]
+      } catch (e) {
+        return 'Documento cargado'
+      }
     }
   },
   methods: {
-    agregarPropietario() {
-      this.form.nombrePropietarios.push('')
-      this.form.porcentajePropietarios = this.form.porcentajePropietarios || []
-      this.form.porcentajePropietarios.push('')
+    triggerInputArchivoMatricula() {
+      this.$refs.inputArchivoMatricula.click()
     },
-    eliminarPropietario(index) {
-      this.form.nombrePropietarios.splice(index, 1)
-      this.form.porcentajePropietarios.splice(index, 1)
+    eliminarArchivoMatricula() {
+      if (!this.form.documentoMatriculaInmobiliariaUrl) return
+      const confirmar = confirm('¿Estás seguro de que deseas eliminar el documento cargado?')
+      if (!confirmar) return
+      this.$emit('archivoEliminado', this.form.documentoMatriculaInmobiliariaUrl)
+      this.form.documentoMatriculaInmobiliariaUrl = ''
+      this.$refs.inputArchivoMatricula.value = null
     },
     async handleArchivoMatricula(event) {
       const archivo = event.target.files[0]
       if (!archivo) return
-      const nombre = `documentos/matriculas/${Date.now()}_${archivo.name}`
-      const ref = storageRef(storage, nombre)
-      await uploadBytes(ref, archivo)
-      const url = await getDownloadURL(ref)
-      this.form.documentoMatriculaInmobiliariaUrl = url
+
+      if (this.form.documentoMatriculaInmobiliariaUrl) {
+        this.$emit('archivoEliminado', this.form.documentoMatriculaInmobiliariaUrl)
+      }
+
+      const ruta = `documentos/matriculas/${Date.now()}_${archivo.name}`
+      const ref = storageRef(storage, ruta)
+
+      try {
+        await uploadBytes(ref, archivo)
+        const url = await getDownloadURL(ref)
+        this.form.documentoMatriculaInmobiliariaUrl = url
+        this.$emit('archivoTemporal', url)
+        console.log('✅ Archivo subido con éxito:', url)
+      } catch (error) {
+        console.error('❌ Error al subir el archivo:', error)
+        alert('Error al subir el archivo. Revisa la consola.')
+      }
     }
   }
 }

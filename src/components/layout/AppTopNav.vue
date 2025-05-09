@@ -1,12 +1,13 @@
 <template>
   <nav class="bg-black text-white flex justify-center space-x-6 py-3">
-    <router-link
-      to="/"
+    <a
+      href="#"
       class="px-4 py-2 rounded hover:bg-gray-800 text-sm font-medium"
       :class="{ 'bg-gray-800': isActive('/') }"
+      @click.prevent="handleNuevaFicha"
     >
       Nueva Ficha
-    </router-link>
+    </a>
 
     <router-link
       to="/fichas"
@@ -24,6 +25,14 @@ export default {
   methods: {
     isActive(route) {
       return this.$route.path === route
+    },
+    handleNuevaFicha() {
+      const bloqueado = sessionStorage.getItem('modoEdicionActiva') === 'true'
+      if (bloqueado) {
+        alert('Debes guardar o cancelar la ficha actual antes de crear una nueva.')
+      } else {
+        this.$router.push('/')
+      }
     }
   }
 }

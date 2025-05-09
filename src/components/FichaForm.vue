@@ -162,6 +162,7 @@ export default {
         direccion: '',
         ciudad: '',
         matricula: '',
+        documentoMatriculaInmobiliariaUrl: '',
         chip: '',
         propietarios: '',
         porcentaje_propietarios: '',

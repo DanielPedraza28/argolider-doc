@@ -4,7 +4,7 @@
     <AppTopNav />
 
     <main class="flex-grow overflow-y-auto">
-      <router-view />
+      <router-view :key="$route.fullPath + reloadKey" />
     </main>
 
     <AppFooter />
@@ -21,6 +21,20 @@ export default {
     AppHeader,
     AppTopNav,
     AppFooter
+  },
+  data() {
+    return {
+      reloadKey: ''
+    }
+  },
+  watch: {
+    $route(to, from) {
+      const isVolverEditar = to.path.startsWith('/ficha/editar') && from.path.startsWith('/ficha/editar')
+      const isVolverCrear = to.path === '/' && from.path === '/'
+      if (isVolverEditar || isVolverCrear) {
+        this.reloadKey = Date.now().toString()
+      }
+    }
   }
 }
 </script>
