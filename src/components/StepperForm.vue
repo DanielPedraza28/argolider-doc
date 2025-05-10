@@ -178,9 +178,14 @@ export default {
         this.modoEdicion = false
         sessionStorage.removeItem('modoEdicionActiva')
         console.log('🧹 modoEdicionActiva eliminado al cancelar')
-        this.$router.push('/fichas')
+
+        // 🔁 Forzar reinicio del componente y luego salir a fichas
+        this.$router.replace('/').then(() => {
+          this.$router.replace('/fichas')
+        })
       }
     },
+
     cancelarCreacion() {
       if (confirm('¿Seguro que deseas cancelar la creación de esta ficha?')) {
         this.resetForm()
