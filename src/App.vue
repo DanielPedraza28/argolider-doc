@@ -1,10 +1,12 @@
 <template>
-  <div class="flex flex-col bg-white text-black min-h-screen">
+  <div class="flex flex-col bg-gray-50 text-black min-h-screen font-sans">
     <AppHeader />
     <AppTopNav />
 
     <main class="flex-grow overflow-y-auto">
-      <router-view :key="$route.fullPath + reloadKey" />
+      <div class="max-w-5xl mx-auto px-4">
+        <router-view :key="$route.fullPath + reloadKey" />
+      </div>
     </main>
 
     <AppFooter />
@@ -35,20 +37,38 @@ export default {
         this.reloadKey = Date.now().toString()
       }
     }
+  },
+  methods: {
+    validarFormularioCompleto(data) {
+      if (!data.numeroInterno || !data.nombrePropiedad || !data.tipo || !data.direccion || !data.ciudad) {
+        alert('Por favor completa todos los campos obligatorios en Identificación')
+        return false
+      }
+
+      const totalPorcentaje = data.nombrePropietarios?.reduce((sum, p) => sum + Number(p.porcentaje || 0), 0)
+      if (totalPorcentaje > 100) {
+        alert('La suma de los porcentajes de propietarios no puede superar el 100%.')
+        return false
+      }
+
+      return true
+    }
   }
 }
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden; /* evita scroll innecesario */
+  min-height: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
 }
 
 #app {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
 }
 </style>

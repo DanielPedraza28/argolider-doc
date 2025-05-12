@@ -1,42 +1,49 @@
 <template>
-  <div class="overflow-y-auto px-6 py-6 bg-gray-50 text-black">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold">📄 Ficha Técnica del Predio</h2>
-      <div class="flex items-center gap-4">
-        <button
-          @click="$router.push('/fichas')"
-          class="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
-        >
-          Volver al listado
-        </button>
-        <button
-          @click="exportarPDF"
-          class="bg-white text-black border border-black px-6 py-2 rounded hover:bg-gray-100"
-        >
-          Exportar PDF
-        </button>
-      </div>
-    </div>
-
-    <!-- CONTENIDO PARA EXPORTAR -->
-    <div ref="contenidoPDF" class="space-y-10">
-
-      <!-- Secciones generales -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="grupo in secciones"
-          :key="grupo.titulo"
-          class="bg-white border rounded-lg shadow-sm p-5 space-y-2"
-        >
-          <h3 class="text-lg font-semibold border-b pb-1 mb-2">{{ grupo.titulo }}</h3>
-          <div v-for="campo in grupo.campos" :key="campo.label" class="text-sm">
-            <p class="font-semibold text-gray-600">{{ campo.label }}</p>
-            <p class="text-gray-800">{{ ficha[campo.clave] || '—' }}</p>
-          </div>
+  <div class="min-h-screen bg-gray-50 text-black px-4 py-6 overflow-y-auto">
+    <div class="max-w-6xl mx-auto space-y-10">
+      <!-- Encabezado y botones -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+        <h2 class="text-2xl font-bold">📄 Ficha Técnica del Predio</h2>
+        <div class="flex gap-3">
+          <button
+            @click="$router.push('/fichas')"
+            class="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+          >
+            Volver al listado
+          </button>
+          <button
+            @click="exportarPDF"
+            class="bg-white text-black border border-black px-6 py-2 rounded hover:bg-gray-100"
+          >
+            Exportar PDF
+          </button>
         </div>
       </div>
 
-      <!-- Ubicación -->
+      <!-- CONTENIDO EXPORTABLE -->
+      <div ref="contenidoPDF" class="space-y-10">
+        <!-- Secciones -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="grupo in secciones"
+            :key="grupo.titulo"
+            class="bg-white border rounded-lg shadow-sm p-5 space-y-2"
+          >
+            <h3 class="text-lg font-semibold border-b pb-1 mb-2">{{ grupo.titulo }}</h3>
+            <div v-for="campo in grupo.campos" :key="campo.label" class="text-sm">
+              <p class="font-semibold text-gray-600">{{ campo.label }}</p>
+              <p class="text-gray-800">
+                {{ campo.clave.startsWith('propietariosPorcentaje__')
+                  ? ficha.propietariosPorcentaje?.[parseInt(campo.clave.split('__')[1])]?.porcentaje + '%' || '—'
+                  : ficha[campo.clave] || '—'
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+
+         <!-- Ubicación -->
       <div class="bg-white border rounded-lg shadow-sm p-6">
         <h3 class="text-lg font-semibold border-b pb-1 mb-4">🗺️ Ubicación Geográfica</h3>
         <div class="flex flex-wrap items-center gap-6">
@@ -112,6 +119,7 @@
       </div>
     </div>
   </div>
+  </div> 
 </template>
 
 <script>
@@ -200,6 +208,31 @@ export default {
       ]
     }
   },
+  async mounted() {
+    const fichaId = this.$route.params.id
+    try {
+      const docRef = doc(db, 'predios', fichaId)
+      const docSnap = await getDoc(docRef)
+      if (docSnap.exists()) {
+        this.ficha = docSnap.data()
+
+        // Agregar sección de propietarios
+        this.secciones.push({
+          titulo: 'Propietarios del Predio',
+          campos: (this.ficha.propietariosPorcentaje || []).map((p, i) => ({
+            label: `Propietario ${i + 1} - ${p.nombre || 'Sin nombre'}`,
+            clave: `propietariosPorcentaje__${i}`
+          }))
+        })
+
+      } else {
+        alert('Ficha no encontrada.')
+        this.$router.push('/fichas')
+      }
+    } catch (error) {
+      console.error('Error al obtener la ficha:', error)
+    }
+  },
   methods: {
     async exportarPDF() {
       const element = this.$refs.contenidoPDF
@@ -208,25 +241,15 @@ export default {
         filename: `Ficha_${this.ficha.nombrePropiedad?.replace(/\s+/g, '_') || 'predio'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } // 📄 Horizontal
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
       }
       html2pdf().set(opt).from(element).save()
-    }
-  },
-  async mounted() {
-    const fichaId = this.$route.params.id
-    try {
-      const docRef = doc(db, 'predios', fichaId)
-      const docSnap = await getDoc(docRef)
-      if (docSnap.exists()) {
-        this.ficha = docSnap.data()
-      } else {
-        alert('Ficha no encontrada.')
-        this.$router.push('/fichas')
-      }
-    } catch (error) {
-      console.error('Error al obtener la ficha:', error)
     }
   }
 }
 </script>
+
+
+<style scoped>
+/* Estilo general ya aplicado con Tailwind */
+</style>

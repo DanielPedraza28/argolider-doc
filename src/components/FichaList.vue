@@ -1,6 +1,6 @@
 <template>
-  <div class="max-w-6xl mx-auto px-4 py-10 h-[calc(100vh-100px)] overflow-y-auto">
-    <h2 class="text-2xl font-bold text-center mb-6">Listado de Fichas Registradas</h2>
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <h2 class="text-2xl font-bold text-center mb-8">Listado de Fichas Registradas</h2>
 
     <input
       type="text"
@@ -12,32 +12,32 @@
     <div v-if="loading" class="text-center text-gray-500">Cargando fichas...</div>
     <div v-else-if="fichasFiltradas.length === 0" class="text-center text-gray-600">No se encontraron fichas.</div>
 
-    <div v-else class="grid gap-6">
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div
-        class="border border-black rounded-lg p-6 bg-white shadow-sm"
+        class="border border-gray-300 rounded-lg p-5 bg-white shadow hover:shadow-md transition duration-200"
         v-for="(ficha, index) in fichasFiltradas"
         :key="index"
       >
         <h3 class="text-lg font-semibold mb-1">{{ ficha.nombrePropiedad }} <span class="text-gray-500 text-sm">({{ ficha.numeroInterno }})</span></h3>
-        <p><strong>Ubicación:</strong> {{ ficha.direccion }}</p>
-        <p><strong>Ciudad:</strong> {{ ficha.ciudad }}</p>
-        <p><strong>Área Arrendada:</strong> {{ ficha.areaArrendada || '—' }}</p>
+        <p class="text-sm text-gray-700"><strong>Ubicación:</strong> {{ ficha.direccion }}</p>
+        <p class="text-sm text-gray-700"><strong>Ciudad:</strong> {{ ficha.ciudad }}</p>
+        <p class="text-sm text-gray-700"><strong>Área Arrendada:</strong> {{ ficha.areaArrendada || '—' }}</p>
 
-        <div class="flex gap-2 mt-4">
+        <div class="flex flex-wrap gap-2 mt-4">
           <button
-            class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 text-sm"
+            class="flex-1 bg-gray-800 text-white px-3 py-1.5 rounded hover:bg-gray-700 text-sm"
             @click="verDetalle(ficha.id)"
           >
-            Ver detalle
+            Ver
           </button>
           <button
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 text-sm"
+            class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-500 text-sm"
             @click="editarFicha(ficha.id)"
           >
             Editar
           </button>
           <button
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500 text-sm"
+            class="flex-1 bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-500 text-sm"
             @click="eliminarFicha(ficha.id, ficha.nombrePropiedad)"
           >
             Eliminar
@@ -47,7 +47,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import { db } from "../firebase/config";
@@ -117,5 +116,5 @@ export default {
 </script>
 
 <style scoped>
-/* Ya no necesitamos estilos personalizados si usamos Tailwind */
+/* No se necesita estilos adicionales, todo lo maneja Tailwind */
 </style>

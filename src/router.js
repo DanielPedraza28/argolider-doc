@@ -34,4 +34,17 @@ const router = createRouter({
   routes
 })
 
+// ⚠️ Proteger navegación si se está editando
+router.beforeEach((to, from, next) => {
+  const modoEdicionActiva = sessionStorage.getItem('modoEdicionActiva')
+  const bloqueadas = ['/', '/fichas']
+
+  if (modoEdicionActiva && bloqueadas.includes(to.path)) {
+    alert('Debes guardar o cancelar la edición antes de salir.')
+    return next(false)
+  }
+
+  next()
+})
+
 export default router

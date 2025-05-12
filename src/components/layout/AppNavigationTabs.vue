@@ -3,7 +3,8 @@
     <div
       v-for="(step, index) in steps"
       :key="index"
-      class="flex items-center space-x-2"
+      class="flex items-center space-x-2 cursor-pointer"
+      @click="$emit('cambiarPaso', index)"
     >
       <div
         :class="[

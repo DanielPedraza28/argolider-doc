@@ -2,7 +2,11 @@
   <div class="flex flex-col bg-gray-50 text-black">
     <main class="flex-grow px-4 pt-4 pb-2">
       <div class="max-w-6xl mx-auto">
-        <AppNavigationTabs :steps="steps" :currentStep="currentStep" />
+        <AppNavigationTabs
+          :steps="steps"
+          :currentStep="currentStep"
+          @cambiarPaso="manejarCambioDePestaña"
+        />
 
         <div class="bg-gray-100 p-6 rounded shadow max-h-[70vh] overflow-y-auto">
           <component
@@ -41,12 +45,22 @@
             </button>
           </div>
 
-          <button
-            class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
-            @click="handleNext"
-          >
-            {{ isLastStep ? (modoEdicion ? 'Guardar Cambios' : 'Finalizar y Guardar') : 'Siguiente' }}
-          </button>
+          <div class="flex gap-2">
+            <button
+              v-if="modoEdicion"
+              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+              @click="saveForm"
+            >
+              Guardar cambios
+            </button>
+            <button
+              v-else
+              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+              @click="handleNext"
+            >
+              {{ isLastStep ? 'Finalizar y Guardar' : 'Siguiente' }}
+            </button>
+          </div>
         </div>
       </div>
     </main>
@@ -54,6 +68,7 @@
 </template>
 
 <script>
+import AppNavigationTabs from './layout/AppNavigationTabs.vue'
 import PasoIdentificacion from './steps/PasoIdentificacion.vue'
 import PasoEstadoAdministrativo from './steps/PasoEstadoAdministrativo.vue'
 import PasoAvaluoImpuestos from './steps/PasoAvaluoImpuestos.vue'
@@ -61,7 +76,6 @@ import PasoServiciosPublicos from './steps/PasoServiciosPublicos.vue'
 import PasoInventarioJuridico from './steps/PasoInventarioJuridico.vue'
 import PasoTecnicoComplementarios from './steps/PasoTecnicoComplementarios.vue'
 import PasoResumen from './steps/PasoResumen.vue'
-import AppNavigationTabs from './layout/AppNavigationTabs.vue'
 
 import { db, storage } from '../firebase/config'
 import { collection, addDoc, doc, updateDoc } from 'firebase/firestore'
@@ -93,12 +107,12 @@ export default {
     return {
       currentStep: 0,
       modoEdicion: false,
+      pasoValido: true,
       archivosParaEliminar: [],
       archivosTemporales: [],
-      pasoValido: true,
       steps: [
         'Identificación',
-        'Estado Administrativo',
+        'Administración y Arrendamiento',
         'Avalúo e Impuestos',
         'Servicios Públicos',
         'Inventario y Estado Jurídico',
@@ -134,7 +148,7 @@ export default {
         PasoAvaluoImpuestos,
         PasoServiciosPublicos,
         PasoInventarioJuridico,
-        PasoTecnicoComplementarios, 
+        PasoTecnicoComplementarios,
         PasoResumen
       ][this.currentStep]
     },
@@ -148,8 +162,26 @@ export default {
       this.modoEdicion = true
       sessionStorage.setItem('modoEdicionActiva', 'true')
     }
+
+    window.addEventListener('beforeunload', this.protegerCierre)
+  },
+  unmounted() {
+    window.removeEventListener('beforeunload', this.protegerCierre)
   },
   methods: {
+    protegerCierre(event) {
+      const hayDatos = Object.values(this.formData).some(val => val && val.length !== 0)
+      const estaEditando = sessionStorage.getItem('modoEdicionActiva') === 'true'
+      if (estaEditando || hayDatos) {
+        event.preventDefault()
+        event.returnValue = ''
+      }
+    },
+    manejarCambioDePestaña(index) {
+      if (this.modoEdicion) {
+        this.currentStep = index
+      }
+    },
     previousStep() {
       if (this.currentStep > 0) this.currentStep--
     },
@@ -167,79 +199,82 @@ export default {
         this.currentStep = 0
         this.modoEdicion = false
         sessionStorage.removeItem('modoEdicionActiva')
-        console.log('🧹 modoEdicionActiva eliminado al cancelar')
-
-        // 🔁 Forzar reinicio del componente y luego salir a fichas
         this.$router.replace('/').then(() => {
           this.$router.replace('/fichas')
         })
       }
     },
-
     cancelarCreacion() {
       if (confirm('¿Seguro que deseas cancelar la creación de esta ficha?')) {
         this.resetForm()
         this.currentStep = 0
         sessionStorage.removeItem('modoEdicionActiva')
-        console.log('🧹 Creación cancelada y archivos temporales limpiados')
-        // No redirigir a otra pestaña
       }
     },
     validarPaso() {
       const d = this.formData
-
       if (this.currentStep === 0) {
         if (!d.numeroInterno || !d.nombrePropiedad || !d.tipo || !d.direccion || !d.ciudad) {
           alert('Por favor completa todos los campos obligatorios en Identificación')
           return false
         }
-      } else if (this.currentStep === 1) {
-        if (!d.estado) {
-          alert('Por favor selecciona el Estado')
-          return false
-        }
-        if (!this.pasoValido) {
-          alert('La suma de porcentajes de propietarios no puede superar el 100%')
-          return false
-        }
+      } else if (this.currentStep === 1 && !d.estado) {
+        alert('Por favor selecciona el Estado')
+        return false
       }
-
+      if (!this.pasoValido) {
+        alert('Hay errores en el paso actual que deben corregirse antes de continuar.')
+        return false
+      }
       return true
     },
-
     registrarArchivoParaEliminar(url) {
       if (url && !this.archivosParaEliminar.includes(url)) {
         this.archivosParaEliminar.push(url)
-        console.log('❌ Archivo marcado para eliminar:', url)
       }
     },
     registrarArchivoTemporal(url) {
       if (url && !this.archivosTemporales.includes(url)) {
         this.archivosTemporales.push(url)
-        console.log('📎 Archivo temporal registrado:', url)
       }
     },
     async eliminarListaArchivos(lista) {
       for (const url of lista) {
         try {
-          console.log('🧹 Intentando eliminar:', url)
-
           const baseUrl = "https://firebasestorage.googleapis.com/v0/b/"
           const bucket = storage.app.options.storageBucket
           const pathStart = `${baseUrl}${bucket}/o/`
           const encodedPath = url.replace(pathStart, '').split('?')[0]
           const decodedPath = decodeURIComponent(encodedPath)
-
           const archivoRef = storageRef(storage, decodedPath)
           await deleteObject(archivoRef)
-
-          console.log('✅ Archivo eliminado de Firebase Storage:', decodedPath)
         } catch (error) {
-          console.error('❌ Error al eliminar archivo:', url, error)
+          console.error('Error al eliminar archivo:', url, error)
         }
       }
     },
     async saveForm() {
+      const d = this.formData
+
+      // Validación campos obligatorios de identificación
+      if (!d.numeroInterno || !d.nombrePropiedad || !d.tipo || !d.direccion || !d.ciudad) {
+        alert('Por favor completa todos los campos obligatorios en Identificación')
+        return
+      }
+
+      // Validación del porcentaje total de propietarios
+      const totalPorcentaje = Array.isArray(d.propietariosPorcentaje)
+        ? d.propietariosPorcentaje.reduce((sum, p) => {
+            const valor = parseFloat(p.porcentaje)
+            return sum + (isNaN(valor) ? 0 : valor)
+          }, 0)
+        : 0
+
+      if (totalPorcentaje > 100) {
+        alert(`La suma de los porcentajes de propietarios es ${totalPorcentaje}%. No puede superar el 100%.`)
+        return
+      }
+
       try {
         const fichaConFecha = {
           fechaCreacion: new Date().toISOString(),
@@ -265,26 +300,23 @@ export default {
         this.currentStep = 0
         this.modoEdicion = false
         sessionStorage.removeItem('modoEdicionActiva')
-        console.log('🧹 modoEdicionActiva eliminado después de guardar')
         this.$router.push('/fichas')
       } catch (error) {
-        console.error('❌ Error al guardar en Firebase:', error)
+        console.error('Error al guardar en Firebase:', error)
         alert('Ocurrió un error al guardar. Revisa la consola.')
       }
     },
+
     resetForm() {
       this.eliminarListaArchivos(this.archivosTemporales)
-
       const camposIniciales = this.$options.data().formData
       for (const key in camposIniciales) {
         this.formData[key] = JSON.parse(JSON.stringify(camposIniciales[key]))
       }
-
       this.formData.documentoEstadoTecnicoUrl = ''
       this.archivosParaEliminar = []
       this.archivosTemporales = []
       sessionStorage.removeItem('modoEdicionActiva')
-      console.log('🧹 Campos limpiados con resetForm()')
     }
   }
 }
