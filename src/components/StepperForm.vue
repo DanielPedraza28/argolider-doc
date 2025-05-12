@@ -10,6 +10,7 @@
             v-model="formData"
             @archivoEliminado="registrarArchivoParaEliminar"
             @archivoTemporal="registrarArchivoTemporal"
+            @validacionPaso="pasoValido = $event"
           />
         </div>
 
@@ -55,13 +56,10 @@
 <script>
 import PasoIdentificacion from './steps/PasoIdentificacion.vue'
 import PasoEstadoAdministrativo from './steps/PasoEstadoAdministrativo.vue'
-import PasoAvaluo from './steps/PasoAvaluo.vue'
-import PasoImpuestos from './steps/PasoImpuestos.vue'
+import PasoAvaluoImpuestos from './steps/PasoAvaluoImpuestos.vue'
 import PasoServiciosPublicos from './steps/PasoServiciosPublicos.vue'
-import PasoInventarios from './steps/PasoInventarios.vue'
-import PasoEstadoJuridico from './steps/PasoEstadoJuridico.vue'
-import PasoEstadoTecnico from './steps/PasoEstadoTecnico.vue'
-import PasoDatosComplementarios from './steps/PasoDatosComplementarios.vue'
+import PasoInventarioJuridico from './steps/PasoInventarioJuridico.vue'
+import PasoTecnicoComplementarios from './steps/PasoTecnicoComplementarios.vue'
 import PasoResumen from './steps/PasoResumen.vue'
 import AppNavigationTabs from './layout/AppNavigationTabs.vue'
 
@@ -75,13 +73,10 @@ export default {
     AppNavigationTabs,
     PasoIdentificacion,
     PasoEstadoAdministrativo,
-    PasoAvaluo,
-    PasoImpuestos,
+    PasoAvaluoImpuestos,
     PasoServiciosPublicos,
-    PasoInventarios,
-    PasoEstadoJuridico,
-    PasoEstadoTecnico,
-    PasoDatosComplementarios,
+    PasoInventarioJuridico,
+    PasoTecnicoComplementarios,
     PasoResumen
   },
   props: {
@@ -100,16 +95,14 @@ export default {
       modoEdicion: false,
       archivosParaEliminar: [],
       archivosTemporales: [],
+      pasoValido: true,
       steps: [
         'Identificación',
         'Estado Administrativo',
-        'Avalúo',
-        'Impuestos',
+        'Avalúo e Impuestos',
         'Servicios Públicos',
-        'Inventarios',
-        'Estado Jurídico',
-        'Estado Técnico',
-        'Datos Complementarios',
+        'Inventario y Estado Jurídico',
+        'Estado Técnico y Complementarios',
         'Resumen Final'
       ],
       formData: {
@@ -138,13 +131,10 @@ export default {
       return [
         PasoIdentificacion,
         PasoEstadoAdministrativo,
-        PasoAvaluo,
-        PasoImpuestos,
+        PasoAvaluoImpuestos,
         PasoServiciosPublicos,
-        PasoInventarios,
-        PasoEstadoJuridico,
-        PasoEstadoTecnico,
-        PasoDatosComplementarios,
+        PasoInventarioJuridico,
+        PasoTecnicoComplementarios, 
         PasoResumen
       ][this.currentStep]
     },
@@ -197,17 +187,26 @@ export default {
     },
     validarPaso() {
       const d = this.formData
+
       if (this.currentStep === 0) {
         if (!d.numeroInterno || !d.nombrePropiedad || !d.tipo || !d.direccion || !d.ciudad) {
           alert('Por favor completa todos los campos obligatorios en Identificación')
           return false
         }
-      } else if (this.currentStep === 1 && !d.estado) {
-        alert('Por favor selecciona el Estado')
-        return false
+      } else if (this.currentStep === 1) {
+        if (!d.estado) {
+          alert('Por favor selecciona el Estado')
+          return false
+        }
+        if (!this.pasoValido) {
+          alert('La suma de porcentajes de propietarios no puede superar el 100%')
+          return false
+        }
       }
+
       return true
     },
+
     registrarArchivoParaEliminar(url) {
       if (url && !this.archivosParaEliminar.includes(url)) {
         this.archivosParaEliminar.push(url)
