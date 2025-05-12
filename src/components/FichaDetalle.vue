@@ -28,6 +28,7 @@
             v-for="grupo in secciones"
             :key="grupo.titulo"
             class="bg-white border rounded-lg shadow-sm p-5 space-y-2"
+            style="break-inside: avoid;"
           >
             <h3 class="text-lg font-semibold border-b pb-1 mb-2">{{ grupo.titulo }}</h3>
             <div v-for="campo in grupo.campos" :key="campo.label" class="text-sm">
@@ -42,85 +43,85 @@
           </div>
         </div>
 
-
-         <!-- Ubicación -->
-      <div class="bg-white border rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-semibold border-b pb-1 mb-4">🗺️ Ubicación Geográfica</h3>
-        <div class="flex flex-wrap items-center gap-6">
-          <div>
-            <p class="text-sm font-semibold text-gray-600">Latitud</p>
-            <p class="text-gray-800">{{ ficha.latitud || '—' }}</p>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-gray-600">Longitud</p>
-            <p class="text-gray-800">{{ ficha.longitud || '—' }}</p>
-          </div>
-          <a
-            v-if="ficha.latitud && ficha.longitud"
-            class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm"
-            :href="`https://www.google.com/maps?q=${ficha.latitud},${ficha.longitud}`"
-            target="_blank"
-          >
-            Ver en Google Maps
-          </a>
-        </div>
-      </div>
-
-      <!-- Nombres antiguos -->
-      <div class="bg-white border rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-semibold border-b pb-1 mb-4">📜 Historial de Nombres</h3>
-        <div v-if="ficha.nombresAntiguos?.length" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div
-            v-for="(nombre, i) in ficha.nombresAntiguos"
-            :key="i"
-            class="bg-gray-50 border rounded p-4"
-          >
-            <p><strong>Nombre:</strong> {{ nombre.nombre }}</p>
-            <p><strong>Hasta:</strong> {{ nombre.anioHasta }}</p>
+        <!-- Ubicación -->
+        <div class="bg-white border rounded-lg shadow-sm p-6" style="break-inside: avoid;">
+          <h3 class="text-lg font-semibold border-b pb-1 mb-4">🗺️ Ubicación Geográfica</h3>
+          <div class="flex flex-wrap items-center gap-6">
+            <div>
+              <p class="text-sm font-semibold text-gray-600">Latitud</p>
+              <p class="text-gray-800">{{ ficha.latitud || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-600">Longitud</p>
+              <p class="text-gray-800">{{ ficha.longitud || '—' }}</p>
+            </div>
+            <a
+              v-if="ficha.latitud && ficha.longitud"
+              class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm"
+              :href="`https://www.google.com/maps?q=${ficha.latitud},${ficha.longitud}`"
+              target="_blank"
+            >
+              Ver en Google Maps
+            </a>
           </div>
         </div>
-        <p v-else class="text-gray-600">No hay nombres anteriores registrados.</p>
-      </div>
 
-      <!-- Imágenes -->
-      <div class="bg-white border rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-semibold border-b pb-1 mb-4">🖼️ Imágenes del Predio</h3>
-        <div v-if="ficha.imagenes?.length" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a
-            v-for="(img, i) in ficha.imagenes"
-            :key="i"
-            :href="img"
-            target="_blank"
-            class="block border rounded overflow-hidden"
-          >
-            <img :src="img" class="w-full h-40 object-cover" />
-          </a>
+        <!-- Nombres antiguos -->
+        <div class="bg-white border rounded-lg shadow-sm p-6" style="break-inside: avoid;">
+          <h3 class="text-lg font-semibold border-b pb-1 mb-4">📜 Historial de Nombres</h3>
+          <div v-if="ficha.nombresAntiguos?.length" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div
+              v-for="(nombre, i) in ficha.nombresAntiguos"
+              :key="i"
+              class="bg-gray-50 border rounded p-4"
+            >
+              <p><strong>Nombre:</strong> {{ nombre.nombre }}</p>
+              <p><strong>Hasta:</strong> {{ nombre.anioHasta }}</p>
+            </div>
+          </div>
+          <p v-else class="text-gray-600">No hay nombres anteriores registrados.</p>
         </div>
-        <p v-else class="text-gray-600">No hay imágenes registradas.</p>
-      </div>
 
-      <!-- Documentos -->
-      <div class="bg-white border rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-semibold border-b pb-1 mb-4">📎 Documentos Adjuntos</h3>
-        <ul class="space-y-2 text-sm text-blue-700 underline">
-          <li v-if="ficha.documentoMatriculaInmobiliariaUrl">
-            <a :href="ficha.documentoMatriculaInmobiliariaUrl" target="_blank">📄 Matrícula Inmobiliaria</a>
-          </li>
-          <li v-if="ficha.documentoClaseInventarioUrl">
-            <a :href="ficha.documentoClaseInventarioUrl" target="_blank">📄 Inventario</a>
-          </li>
-          <li v-if="ficha.documentoEstadoTecnicoUrl">
-            <a :href="ficha.documentoEstadoTecnicoUrl" target="_blank">📄 Estado Técnico</a>
-          </li>
-          <li v-if="!ficha.documentoMatriculaInmobiliariaUrl && !ficha.documentoClaseInventarioUrl && !ficha.documentoEstadoTecnicoUrl">
-            <span class="text-gray-600">No hay documentos cargados.</span>
-          </li>
-        </ul>
+        <!-- Imágenes -->
+        <div class="bg-white border rounded-lg shadow-sm p-6" style="break-inside: avoid;">
+          <h3 class="text-lg font-semibold border-b pb-1 mb-4">🖼️ Imágenes del Predio</h3>
+          <div v-if="ficha.imagenes?.length" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a
+              v-for="(img, i) in ficha.imagenes"
+              :key="i"
+              :href="img"
+              target="_blank"
+              class="block border rounded overflow-hidden"
+            >
+              <img :src="img" class="w-full h-40 object-cover" />
+            </a>
+          </div>
+          <p v-else class="text-gray-600">No hay imágenes registradas.</p>
+        </div>
+
+        <!-- Documentos -->
+        <div class="bg-white border rounded-lg shadow-sm p-6" style="break-inside: avoid;">
+          <h3 class="text-lg font-semibold border-b pb-1 mb-4">📎 Documentos Adjuntos</h3>
+          <ul class="space-y-2 text-sm text-blue-700 underline">
+            <li v-if="ficha.documentoMatriculaInmobiliariaUrl">
+              <a :href="ficha.documentoMatriculaInmobiliariaUrl" target="_blank">📄 Matrícula Inmobiliaria</a>
+            </li>
+            <li v-if="ficha.documentoClaseInventarioUrl">
+              <a :href="ficha.documentoClaseInventarioUrl" target="_blank">📄 Inventario</a>
+            </li>
+            <li v-if="ficha.documentoEstadoTecnicoUrl">
+              <a :href="ficha.documentoEstadoTecnicoUrl" target="_blank">📄 Estado Técnico</a>
+            </li>
+            <li v-if="!ficha.documentoMatriculaInmobiliariaUrl && !ficha.documentoClaseInventarioUrl && !ficha.documentoEstadoTecnicoUrl">
+              <span class="text-gray-600">No hay documentos cargados.</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
-  </div> 
 </template>
+
 
 <script>
 import { db } from '@/firebase/config'

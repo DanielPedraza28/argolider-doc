@@ -21,7 +21,6 @@
         <h3 class="text-lg font-semibold mb-1">{{ ficha.nombrePropiedad }} <span class="text-gray-500 text-sm">({{ ficha.numeroInterno }})</span></h3>
         <p class="text-sm text-gray-700"><strong>Ubicación:</strong> {{ ficha.direccion }}</p>
         <p class="text-sm text-gray-700"><strong>Ciudad:</strong> {{ ficha.ciudad }}</p>
-        <p class="text-sm text-gray-700"><strong>Área Arrendada:</strong> {{ ficha.areaArrendada || '—' }}</p>
 
         <div class="flex flex-wrap gap-2 mt-4">
           <button
