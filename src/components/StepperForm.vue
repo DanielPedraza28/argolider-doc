@@ -48,14 +48,16 @@
           <div class="flex gap-2">
             <button
               v-if="modoEdicion"
-              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+              :disabled="isSaving"
+              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50"
               @click="saveForm"
             >
               Guardar cambios
             </button>
             <button
               v-else
-              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+              :disabled="isSaving"
+              class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50"
               @click="handleNext"
             >
               {{ isLastStep ? 'Finalizar y Guardar' : 'Siguiente' }}
@@ -66,6 +68,7 @@
     </main>
   </div>
 </template>
+
 
 <script>
 import AppNavigationTabs from './layout/AppNavigationTabs.vue'
@@ -105,6 +108,7 @@ export default {
   },
   data() {
     return {
+      isSaving: false,
       currentStep: 0,
       modoEdicion: false,
       pasoValido: true,
@@ -238,6 +242,17 @@ export default {
         this.archivosTemporales.push(url)
       }
     },
+    resetForm() {
+      this.eliminarListaArchivos(this.archivosTemporales)
+      const camposIniciales = this.$options.data().formData
+      for (const key in camposIniciales) {
+        this.formData[key] = JSON.parse(JSON.stringify(camposIniciales[key]))
+      }
+      this.formData.documentoEstadoTecnicoUrl = ''
+      this.archivosParaEliminar = []
+      this.archivosTemporales = []
+      sessionStorage.removeItem('modoEdicionActiva')
+    },
     async eliminarListaArchivos(lista) {
       for (const url of lista) {
         try {
@@ -254,11 +269,15 @@ export default {
       }
     },
     async saveForm() {
+      if (this.isSaving) return
+      this.isSaving = true
+
       const d = this.formData
 
       // Validación campos obligatorios de identificación
       if (!d.numeroInterno || !d.nombrePropiedad || !d.tipo || !d.direccion || !d.ciudad) {
         alert('Por favor completa todos los campos obligatorios en Identificación')
+        this.isSaving = false
         return
       }
 
@@ -272,6 +291,7 @@ export default {
 
       if (totalPorcentaje > 100) {
         alert(`La suma de los porcentajes de propietarios es ${totalPorcentaje}%. No puede superar el 100%.`)
+        this.isSaving = false
         return
       }
 
@@ -304,20 +324,10 @@ export default {
       } catch (error) {
         console.error('Error al guardar en Firebase:', error)
         alert('Ocurrió un error al guardar. Revisa la consola.')
+      } finally {
+        this.isSaving = false
       }
     },
-
-    resetForm() {
-      this.eliminarListaArchivos(this.archivosTemporales)
-      const camposIniciales = this.$options.data().formData
-      for (const key in camposIniciales) {
-        this.formData[key] = JSON.parse(JSON.stringify(camposIniciales[key]))
-      }
-      this.formData.documentoEstadoTecnicoUrl = ''
-      this.archivosParaEliminar = []
-      this.archivosTemporales = []
-      sessionStorage.removeItem('modoEdicionActiva')
-    }
   }
 }
 </script>

@@ -48,8 +48,11 @@
 </template>
 
 <script>
-import { db } from "../firebase/config";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+
+import { db } from '../firebase/config'
+import { doc, getDoc, deleteDoc, getDocs, collection } from 'firebase/firestore'
+import { ref as storageRef, deleteObject } from 'firebase/storage'
+import { storage } from '../firebase/config'
 
 export default {
   name: "FichaList",
@@ -98,15 +101,54 @@ export default {
       this.$router.push(`/ficha/editar/${id}`);
     },
     async eliminarFicha(id, nombre) {
-      if (confirm(`¿Estás seguro de eliminar la ficha de "${nombre}"?`)) {
-        try {
-          await deleteDoc(doc(db, 'predios', id))
-          this.cargarFichas()
-        } catch (error) {
-          console.error('Error al eliminar ficha:', error)
+      if (!confirm(`¿Estás seguro de eliminar la ficha de "${nombre}"?`)) return
+
+      try {
+        const fichaRef = doc(db, 'predios', id)
+        const fichaSnap = await getDoc(fichaRef)
+
+        if (fichaSnap.exists()) {
+          const fichaData = fichaSnap.data()
+
+          const baseUrl = "https://firebasestorage.googleapis.com/v0/b/"
+          const bucket = storage.app.options.storageBucket
+          const pathStart = `${baseUrl}${bucket}/o/`
+
+          const eliminarArchivo = async (url) => {
+            if (!url) return
+            try {
+              const encodedPath = url.replace(pathStart, '').split('?')[0]
+              const decodedPath = decodeURIComponent(encodedPath)
+              const ref = storageRef(storage, decodedPath)
+              await deleteObject(ref)
+            } catch (e) {
+              console.warn('No se pudo eliminar archivo:', url, e)
+            }
+          }
+
+          await eliminarArchivo(fichaData.documentoMatriculaInmobiliariaUrl)
+          await eliminarArchivo(fichaData.documentoClaseInventarioUrl)
+          await eliminarArchivo(fichaData.documentoEstadoTecnicoUrl)
+
+          if (Array.isArray(fichaData.imagenes)) {
+            for (const img of fichaData.imagenes) {
+              if (typeof img === 'string') {
+                await eliminarArchivo(img)
+              }
+            }
+          }
         }
+
+        await deleteDoc(fichaRef)
+        await this.cargarFichas()
+
+        alert('✅ Ficha y archivos eliminados correctamente.')
+      } catch (error) {
+        console.error('Error al eliminar ficha:', error)
+        alert('❌ Ocurrió un error al eliminar la ficha. Revisa la consola.')
       }
     }
+
   },
   mounted() {
     this.cargarFichas();
