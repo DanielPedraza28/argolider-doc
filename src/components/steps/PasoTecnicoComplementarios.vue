@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 border rounded bg-white">
-    <h2 class="text-xl font-bold mb-6 text-center">Paso 5: Estado Técnico y Datos Complementarios</h2>
+    <h2 class="text-xl font-bold mb-6 text-center">Paso 6 Estado Técnico y Datos Complementarios</h2>
 
     <!-- Estado Técnico -->
     <div class="mb-8 p-4 border rounded bg-gray-50 shadow-sm">

@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 border rounded bg-white">
-    <h2 class="text-xl font-bold mb-6 text-center">Paso 5: Servicios Públicos</h2>
+    <h2 class="text-xl font-bold mb-6 text-center">Paso 4: Servicios Públicos</h2>
 
     <div v-for="tipo in ['energia', 'agua', 'gas']" :key="tipo" class="mb-10 border border-gray-300 rounded-lg p-4 shadow-sm bg-gray-50">
       <h3 class="text-lg font-semibold mb-4 capitalize text-gray-800 border-b pb-2">{{ tipo }}</h3>
